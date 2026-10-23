@@ -118,9 +118,7 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
 
-print("Site adresi: http://127.0.0.1:8000")
-print("Kapatmak için Ctrl+C")
-HTTPServer(("127.0.0.1", 8000), Handler).serve_forever()
+
 import os
 
 if __name__ == '__main__':
