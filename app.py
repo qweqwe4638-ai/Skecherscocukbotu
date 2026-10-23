@@ -121,8 +121,6 @@ class Handler(BaseHTTPRequestHandler):
 
 import os
 
-if __name__ == '__main__':
-    # Render'ın atadığı portu yakalar, yoksa 10000 kullanır
-    port = int(os.environ.get('PORT', 10000))
-    # host='0.0.0.0' dış dünyadan erişim verilmesini sağlar
-    app.run(host='0.0.0.0', port=port)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    HTTPServer(("0.0.0.0", port), Handler).serve_forever()
